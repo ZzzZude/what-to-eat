@@ -1,69 +1,50 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const [selectedMode, setSelectedMode] = useState("");
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className={styles.page}>
+      <div className={styles.content}>
+        <header>
+          <p className={styles.brand}>なに食べる？</p>
+          <h1 className={styles.title}>今天吃啥？</h1>
+          <p className={styles.subtitle}>
+            一个人随便选，一群人一起选。
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        </header>
+
+        <section className={styles.options} aria-label="选择吃饭方式">
+<Link href="/group" className={styles.option}>
+  <strong>一起吃</strong>
+  <span>大家提交想吃的，抽出一个共同选择。</span>
+</Link>
+
+          <button
+            type="button"
+            className={styles.option}
+            aria-pressed={selectedMode === "nearby"}
+            onClick={() => setSelectedMode("nearby")}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <strong>附近吃</strong>
+            <span>看看周围有什么，让它帮你选一家。</span>
+          </button>
+        </section>
+
+        <p className={styles.status} role="status">
+          {selectedMode === "nearby"
+            ? "附近餐馆功能暂未开放。"
+            : "先选一种方式试试看。"}
+        </p>
+
+        <footer className={styles.footer}>
+          界面预览 · 多人同步和地图功能尚未接入
+        </footer>
+      </div>
+    </main>
   );
 }

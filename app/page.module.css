@@ -1,150 +1,175 @@
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
+  min-height: 100svh;
+  width: 100%;
   display: flex;
-  flex: 1;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  padding: 32px 20px;
+  background: #fff8ef;
+  color: #34261f;
 }
 
-.main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
-}
-
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
+.content {
   width: 100%;
   max-width: 440px;
+}
+
+.brand {
+  color: #a44b1d;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.title {
+  margin-top: 16px;
+  font-size: 44px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin-top: 16px;
+  color: #76655b;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.options {
+  display: grid;
   gap: 16px;
+  margin-top: 36px;
+}
+
+.option {
+  width: 100%;
+  padding: 24px;
+  border: 2px solid #eadbcd;
+  border-radius: 20px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option strong {
+  display: block;
+  font-size: 22px;
+}
+
+.option span {
+  display: block;
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.option:hover {
+  background: #fff1e3;
+}
+
+.option[aria-pressed="true"] {
+  border-color: #d5682b;
+  background: #fff1e3;
+}
+
+.option:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 4px;
+}
+
+.status {
+  min-height: 48px;
+  margin-top: 24px;
+  color: #76655b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.footer {
+  margin-top: 24px;
+  color: #76655b;
+  font-size: 12px;
+  text-align: center;
+}
+.back {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: #a44b1d;
   font-size: 14px;
 }
 
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
+.form {
+  margin-top: 32px;
+}
+
+.label {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 2px solid #eadbcd;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #34261f;
+  font: inherit;
+  font-size: 16px;
+}
+
+.help {
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.error {
+  margin-top: 10px;
+  color: #b42318;
+  font-size: 14px;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #a44b1d;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
   cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.back:focus-visible,
+.input:focus-visible,
+.submit:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 4px;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.preview {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #eadbcd;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow-wrap: anywhere;
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+.preview h2 {
+  font-size: 18px;
 }
 
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
-}
-
-.code {
-  font-family: var(--font-geist-mono);
-  font-size: 0.9em;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  padding: 0.1em 0.4em;
-  border-radius: 6px;
+.preview p {
+  margin-top: 10px;
+  line-height: 1.7;
 }
