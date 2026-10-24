@@ -42,7 +42,7 @@ export default function Home() {
         </p>
 
         <footer className={styles.footer}>
-          界面预览 · 多人同步和地图功能尚未接入
+          多人组队已开放 · 附近餐馆功能开发中
         </footer>
       </div>
     </main>

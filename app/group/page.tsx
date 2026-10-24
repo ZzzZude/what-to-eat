@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import type { FormEvent } from "react";
-import FoodCandidates from "./FoodCandidates";
+import { useState, type FormEvent } from "react";
+import CloudCandidates from "./CloudCandidates";
+import JoinRoomForm from "./JoinRoomForm";
 import useSavedText from "./useSavedText";
 import sharedStyles from "../page.module.css";
 import styles from "./page.module.css";
@@ -17,11 +18,16 @@ export default function GroupPage() {
   const [selectedAction, setSelectedAction] =
     useSavedText("what-to-eat:selected-action");
 
-  const [roomCode, setRoomCode] =
-    useSavedText("what-to-eat:room-code");
+const [roomCode, setRoomCode] =
+  useSavedText("what-to-eat:cloud-room-code");
 
+const [isCreating, setIsCreating] = useState(false);
+const [createError, setCreateError] = useState("");
+const [isJoining, setIsJoining] = useState(false);
+const isBusy = isCreating || isJoining;
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setCreateError("");
 
     const cleanedName = nickname.trim();
 
@@ -34,18 +40,82 @@ export default function GroupPage() {
     setRoomCode("");
   }
 
-  function handleCreateRoom() {
-    if (!roomCode) {
-      const newCode = Math.floor(
-        100000 + Math.random() * 900000
-      ).toString();
+async function handleCreateRoom() {
+  if (isBusy) {
+    return;
+  }
 
-      setRoomCode(newCode);
+  setCreateError("");
+
+  const cleanedName = confirmedName.trim();
+
+  if (!cleanedName) {
+    setCreateError("请先确认昵称。");
+    return;
+  }
+
+  // 已有房间时，重新显示它，不重复创建
+  if (roomCode) {
+    setSelectedAction("create");
+    return;
+  }
+
+  setIsCreating(true);
+
+  try {
+    // 把昵称提交给我们自己的后端接口
+    const response = await fetch("/api/rooms", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        nickname: cleanedName,
+      }),
+    });
+
+    const data: unknown = await response.json();
+
+    if (typeof data !== "object" || data === null) {
+      throw new Error("服务器返回的数据格式不正确。");
     }
 
+    if (
+      !response.ok ||
+      !("ok" in data) ||
+      data.ok !== true
+    ) {
+      const message =
+        "message" in data &&
+        typeof data.message === "string"
+          ? data.message
+          : "创建房间失败，请稍后重试。";
+
+      throw new Error(message);
+    }
+
+    if (
+      !("roomCode" in data) ||
+      typeof data.roomCode !== "string" ||
+      !/^[0-9]{6}$/.test(data.roomCode)
+    ) {
+      throw new Error("服务器没有返回有效的六位房间号。");
+    }
+
+    // 只有后端创建成功，才保存并展示房间号
+    setRoomCode(data.roomCode);
     setSelectedAction("create");
+  } catch (error) {
+    setCreateError(
+      error instanceof Error
+        ? error.message
+        : "创建房间失败，请稍后重试。"
+    );
+  } finally {
+    setIsCreating(false);
   }
-  return (
+}  return (
     <main className={sharedStyles.page}>
       <div className={sharedStyles.content}>
         <Link href="/" className={styles.backLink}>
@@ -68,6 +138,7 @@ export default function GroupPage() {
           <input
             id="nickname"
             className={styles.input}
+            disabled={isBusy}
             type="text"
             value={nickname}
             maxLength={20}
@@ -79,12 +150,17 @@ export default function GroupPage() {
               setConfirmedName("");
               setSelectedAction("");
               setRoomCode("");
+              setCreateError("");
             }}
           />
 
-          <button className={styles.submitButton} type="submit">
-            确认昵称
-          </button>
+<button
+  className={styles.submitButton}
+  type="submit"
+  disabled={isBusy}
+>
+  确认昵称
+</button>
         </form>
 
         {confirmedName ? (
@@ -104,33 +180,41 @@ export default function GroupPage() {
             </h2>
 
             <div className={styles.actionList}>
-              <button
-                type="button"
-                className={styles.actionButton}
-                aria-pressed={selectedAction === "create"}
-                onClick={handleCreateRoom}
-              >
-                <strong>创建房间</strong>
-                <span>我来发起，然后邀请朋友加入。</span>
+<button
+  type="button"
+  className={styles.actionButton}
+  aria-pressed={selectedAction === "create"}
+  aria-busy={isCreating}
+  disabled={isBusy}
+  onClick={handleCreateRoom}
+>
+  <strong>
+    {isCreating ? "正在创建…" : "创建房间"}
+  </strong>
+  <span>我来发起，然后邀请朋友加入。</span>
               </button>
 
               <button
                 type="button"
                 className={styles.actionButton}
+                disabled={isBusy}
                 aria-pressed={selectedAction === "join"}
                 onClick={() => setSelectedAction("join")}
               >
                 <strong>加入房间</strong>
                 <span>输入朋友发来的房间号码。</span>
-              </button>
-            </div>
-
+              </button>            </div>
+{createError ? (
+  <p className={styles.errorText} role="alert">
+    {createError}
+  </p>
+) : null}
             {selectedAction === "create" && roomCode ? (
               <section
                 className={styles.roomPreview}
                 aria-labelledby="room-preview-title"
               >
-                <h3 id="room-preview-title">房间信息预览</h3>
+                <h3 id="room-preview-title">房间已创建</h3>
 
                 <p className={styles.hint}>房间号</p>
 
@@ -143,24 +227,26 @@ export default function GroupPage() {
                 </p>
 
                 <p className={styles.hint}>
-                  当前仅供本机预览，暂不支持朋友加入。
+                  候选清单和抽选结果已支持云端共享。
                 </p>
               </section>
             ) : null}
 
             {selectedAction === "join" ? (
-              <p className={styles.selection} role="status">
-                已选择：加入房间。房间号输入功能将在后续步骤添加。
-              </p>
-            ) : null}
-                        {roomCode ? (
-              <div hidden={selectedAction !== "create"}>
-<FoodCandidates
-  key={roomCode}
-  roomCode={roomCode}
-/>
-              </div>
-            ) : null}
+  <JoinRoomForm
+    key={confirmedName}
+    nickname={confirmedName}
+    disabled={isBusy}
+    onBusyChange={setIsJoining}
+  />
+) : null}
+{selectedAction === "create" && roomCode ? (
+  <CloudCandidates
+    key={roomCode}
+    roomCode={roomCode}
+    disabled={isBusy}
+  />
+) : null}
           </section>
         ) : (
           <p className={styles.hint}>
