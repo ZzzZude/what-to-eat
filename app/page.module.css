@@ -92,6 +92,8 @@
   color: #76655b;
   font-size: 12px;
   text-align: center;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 .back {
   display: inline-block;

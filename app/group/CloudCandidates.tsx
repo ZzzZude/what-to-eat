@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/app/components/LanguageProvider";
+import { message, type TranslationInput } from "@/lib/i18n";
+
 import {
   useEffect,
   useId,
@@ -107,13 +110,14 @@ export default function CloudCandidates({
   roomCode,
   disabled = false,
 }: Props) {
+  const { t, locale } = useLanguage();
   const id = useId();
 
   const [room, setRoom] = useState<RoomData | null>(null);
   const [foodName, setFoodName] = useState("");
   const [readError, setReadError] = useState("");
   const [submitError, setSubmitError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<TranslationInput>("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState("");
@@ -267,7 +271,7 @@ export default function CloudCandidates({
     }
 
     const confirmed = window.confirm(
-      `确定从共享清单删除“${candidate.name}”吗？`
+      t("确定从共享清单删除“{name}”吗？", { name: candidate.name })
     );
 
     if (!confirmed) return;
@@ -293,7 +297,7 @@ export default function CloudCandidates({
         );
       }
 
-      setNotice(`已从云端删除“${candidate.name}”。`);
+      setNotice(message("已从云端删除“{name}”。", { name: candidate.name }));
     } catch (error) {
       setSubmitError(
         error instanceof TypeError
@@ -318,7 +322,7 @@ export default function CloudCandidates({
     }
 
     const confirmed = window.confirm(
-      "确定清空这个房间的全部候选吗？当前抽选结果也会清除，房间和成员会保留。"
+      t("确定清空这个房间的全部候选吗？当前抽选结果也会清除，房间和成员会保留。")
     );
 
     if (!confirmed) return;
@@ -347,7 +351,7 @@ export default function CloudCandidates({
       }
 
       setFoodName("");
-      setNotice(`已清空 ${data.deletedCount} 个候选，可以重新添加。`);
+      setNotice(message("已清空 {count} 个候选，可以重新添加。", { count: data.deletedCount }));
     } catch (error) {
       setSubmitError(
         error instanceof TypeError
@@ -423,22 +427,16 @@ export default function CloudCandidates({
       <h3
         id={`${id}-title`}
         className={styles.choiceTitle}
-      >
-        一起添加想吃的
-      </h3>
+      >{t("一起添加想吃的")}</h3>
 
-      <p className={styles.hint}>
-        房间 {roomCode} · 约每 3 秒检查更新
-      </p>
+      <p className={styles.hint}>{t("房间 {code} · 约每 3 秒检查更新", { code: roomCode })}</p>
 
       <button
         type="button"
         className={styles.removeButton}
         disabled={busy}
         onClick={() => setRefreshKey((value) => value + 1)}
-      >
-        刷新清单
-      </button>
+      >{t("刷新清单")}</button>
 
       {room?.currentMember.role === "host" ? (
         <button
@@ -453,51 +451,36 @@ export default function CloudCandidates({
           aria-busy={clearing}
           onClick={() => void handleClear()}
         >
-          {clearing ? "正在清空…" : "清空共享清单"}
+          {clearing ? t("正在清空…") : t("清空共享清单")}
         </button>
       ) : null}
 
       {loading ? (
-        <p className={styles.hint} role="status">
-          正在读取云端清单…
-        </p>
+        <p className={styles.hint} role="status">{t("正在读取云端清单…")}</p>
       ) : null}
 
       {readError ? (
         <p className={styles.errorText} role="alert">
-          {readError} 当前清单和抽选结果可能不是最新。
-        </p>
+          {t(readError)} {t("当前清单和抽选结果可能不是最新。")}</p>
       ) : null}
 
       {room ? (
         <p className={styles.hint}>
-          房间成员：
-          {room.members
-            .map((member) => member.nickname)
-            .join("、")}
+          {t("房间成员：{names}", { names: room.members.map((member) => member.nickname).join(locale === "en" ? ", " : "、") })}
           <br />
-          当前身份：{room.currentMember.nickname}
-          （
-          {room.currentMember.role === "host"
-            ? "房主"
-            : "成员"}
-          ）
+          {t("当前身份：{name}（{role}）", { name: room.currentMember.nickname, role: room.currentMember.role === "host" ? t("房主") : t("成员") })}
         </p>
       ) : null}
 
       {room?.room.status === "closed" ? (
-        <p className={styles.errorText}>
-          房间已关闭，不能修改清单或抽选。
-        </p>
+        <p className={styles.errorText}>{t("房间已关闭，不能修改清单或抽选。")}</p>
       ) : null}
 
       <form className={styles.form} onSubmit={handleAdd}>
         <label
           className={styles.label}
           htmlFor={`${id}-food`}
-        >
-          食物或餐馆名称
-        </label>
+        >{t("食物或餐馆名称")}</label>
 
         <input
           id={`${id}-food`}
@@ -507,7 +490,7 @@ export default function CloudCandidates({
           maxLength={60}
           required
           disabled={!canEdit}
-          placeholder="例如：寿司、拉面、一兰"
+          placeholder={t("例如：寿司、拉面、一兰")}
           aria-invalid={Boolean(submitError)}
           aria-describedby={
             submitError ? `${id}-error` : undefined
@@ -524,7 +507,7 @@ export default function CloudCandidates({
           type="submit"
           disabled={!canEdit}
         >
-          {saving ? "正在保存…" : "添加到共享清单"}
+          {saving ? t("正在保存…") : t("添加到共享清单")}
         </button>
 
         {submitError ? (
@@ -533,27 +516,23 @@ export default function CloudCandidates({
             className={styles.errorText}
             role="alert"
           >
-            {submitError}
+            {t(submitError)}
           </p>
         ) : null}
 
         {notice ? (
           <p className={styles.message} role="status">
-            {notice}
+            {t(notice)}
           </p>
         ) : null}
       </form>
 
       {room ? (
         <>
-          <p className={styles.hint}>
-            云端共有 {room.candidates.length} 个选项
-          </p>
+          <p className={styles.hint}>{t("云端共有 {count} 个选项", { count: room.candidates.length })}</p>
 
           {room.candidates.length === 0 ? (
-            <p className={styles.hint}>
-              清单还是空的，先添加一个吧。
-            </p>
+            <p className={styles.hint}>{t("清单还是空的，先添加一个吧。")}</p>
           ) : (
             <ul className={styles.candidateList}>
               {room.candidates.map((candidate) => (
@@ -565,12 +544,10 @@ export default function CloudCandidates({
                     <span>{candidate.name}</span>
                     <br />
                     <small>
-                      {room.members.find(
+                      {t("由 {name} 提交", { name: room.members.find(
                         (member) =>
                           member.id === candidate.submittedBy
-                      )?.nickname ?? "成员"}{" "}
-                      提交
-                    </small>
+                      )?.nickname ?? t("成员") })}</small>
                   </div>
 
                   {room.currentMember.role === "host" ||
@@ -579,13 +556,13 @@ export default function CloudCandidates({
                       type="button"
                       className={styles.removeButton}
                       disabled={!canEdit}
-                      aria-label={`删除候选：${candidate.name}`}
+                      aria-label={t("删除候选：{name}", { name: candidate.name })}
                       aria-busy={deletingId === candidate.id}
                       onClick={() => void handleDelete(candidate)}
                     >
                       {deletingId === candidate.id
-                        ? "正在删除…"
-                        : "删除"}
+                        ? t("正在删除…")
+                        : t("删除")}
                     </button>
                   ) : null}
                 </li>
@@ -603,9 +580,7 @@ export default function CloudCandidates({
           <h3
             id={`${id}-draw-title`}
             className={styles.choiceTitle}
-          >
-            一起决定吃什么
-          </h3>
+          >{t("一起决定吃什么")}</h3>
 
           {room.currentMember.role === "host" ? (
             <>
@@ -617,39 +592,31 @@ export default function CloudCandidates({
                 onClick={() => void handleDraw()}
               >
                 {drawing
-                  ? "正在抽选…"
+                  ? t("正在抽选…")
                   : room.room.currentResult !== null
-                    ? "再选一次"
-                    : "随机选一个"}
+                    ? t("再选一次")
+                    : t("随机选一个")}
               </button>
-              <p className={styles.hint}>
-                每次重新随机抽选，可能出现相同结果。
-              </p>
+              <p className={styles.hint}>{t("每次重新随机抽选，可能出现相同结果。")}</p>
             </>
           ) : (
-            <p className={styles.hint}>
-              由房主发起抽选，结果会自动同步到这里。
-            </p>
+            <p className={styles.hint}>{t("由房主发起抽选，结果会自动同步到这里。")}</p>
           )}
 
           {room.room.currentResult !== null ? (
             <div className={styles.drawResult} role="status">
-              <h4>今天就吃</h4>
+              <h4>{t("今天就吃")}</h4>
               <p className={styles.drawResultName}>
                 {room.room.currentResult}
               </p>
             </div>
           ) : (
-            <p className={styles.hint} role="status">
-              还没有有效的抽选结果，请先添加候选并由房主发起抽选。
-            </p>
+            <p className={styles.hint} role="status">{t("还没有有效的抽选结果，请先添加候选并由房主发起抽选。")}</p>
           )}
         </section>
       ) : null}
 
-      <p className={styles.hint}>
-        房主可抽选、删除任意候选或清空清单；成员可添加候选并删除自己的提交。
-      </p>
+      <p className={styles.hint}>{t("房主可抽选、删除任意候选或清空清单；成员可添加候选并删除自己的提交。")}</p>
     </section>
   );
 }

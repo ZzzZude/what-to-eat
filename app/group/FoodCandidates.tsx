@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/app/components/LanguageProvider";
+
 import { useState, type FormEvent } from "react";
 import useSavedText from "./useSavedText";
 import styles from "./page.module.css";
@@ -28,6 +30,7 @@ function parseFoods(text: string): string[] {
 export default function FoodCandidates({
   roomCode,
 }: FoodCandidatesProps) {
+  const { t } = useLanguage();
   const [foodName, setFoodName] = useState("");
   const [error, setError] = useState("");
 
@@ -89,7 +92,7 @@ export default function FoodCandidates({
   }
     function handleClearFoods() {
     const confirmed = window.confirm(
-      "确定清空本房间的候选和抽选结果吗？"
+      t("确定清空本房间的候选和抽选结果吗？")
     );
 
     if (!confirmed) {
@@ -106,14 +109,10 @@ export default function FoodCandidates({
       className={styles.choicePanel}
       aria-labelledby="food-list-title"
     >
-      <h3 id="food-list-title" className={styles.choiceTitle}>
-        想吃什么？
-      </h3>
+      <h3 id="food-list-title" className={styles.choiceTitle}>{t("想吃什么？")}</h3>
 
       <form className={styles.form} onSubmit={handleAddFood}>
-        <label className={styles.label} htmlFor="food-name">
-          食物或餐馆名称
-        </label>
+        <label className={styles.label} htmlFor="food-name">{t("食物或餐馆名称")}</label>
 
         <input
           id="food-name"
@@ -121,7 +120,7 @@ export default function FoodCandidates({
           type="text"
           value={foodName}
           maxLength={60}
-          placeholder="例如：寿司、拉面、一兰"
+          placeholder={t("例如：寿司、拉面、一兰")}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "food-error" : undefined}
           onChange={(event) => {
@@ -130,9 +129,7 @@ export default function FoodCandidates({
           }}
         />
 
-        <button className={styles.submitButton} type="submit">
-          添加到清单
-        </button>
+        <button className={styles.submitButton} type="submit">{t("添加到清单")}</button>
 
         {error ? (
           <p
@@ -140,19 +137,15 @@ export default function FoodCandidates({
             className={styles.errorText}
             role="alert"
           >
-            {error}
+            {t(error)}
           </p>
         ) : null}
       </form>
 
-      <p className={styles.hint} role="status">
-        已添加 {foods.length} 个选项
-      </p>
+      <p className={styles.hint} role="status">{t("已添加 {count} 个选项", { count: foods.length })}</p>
 
       {foods.length === 0 ? (
-        <p className={styles.hint}>
-          清单还是空的，先添加一个想吃的吧。
-        </p>
+        <p className={styles.hint}>{t("清单还是空的，先添加一个想吃的吧。")}</p>
       ) : (
         <ul className={styles.candidateList}>
           {foods.map((food) => (
@@ -162,11 +155,9 @@ export default function FoodCandidates({
               <button
                 type="button"
                 className={styles.removeButton}
-                aria-label={`删除${food}`}
+                aria-label={t("删除候选：{name}", { name: food })}
                 onClick={() => handleRemoveFood(food)}
-              >
-                删除
-              </button>
+              >{t("删除")}</button>
             </li>
           ))}
         </ul>
@@ -178,19 +169,17 @@ export default function FoodCandidates({
           disabled={foods.length === 0}
           onClick={handlePickFood}
         >
-          {pickedFood ? "再选一次" : "随机选一个"}
+          {pickedFood ? t("再选一次") : t("随机选一个")}
         </button>
         <button
           type="button"
           className={styles.removeButton}
           disabled={foods.length === 0 && !pickedFood}
           onClick={handleClearFoods}
-        >
-          清空本房间清单
-        </button>
+        >{t("清空本房间清单")}</button>
         {pickedFood ? (
           <div className={styles.drawResult} role="status">
-            <h4>今天就吃</h4>
+            <h4>{t("今天就吃")}</h4>
             <p className={styles.drawResultName}>
               {pickedFood}
             </p>

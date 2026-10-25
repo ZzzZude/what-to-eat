@@ -30,6 +30,7 @@ export type RestaurantSearchConditions = Coordinates & {
 export type RestaurantSearchSnapshot = RestaurantPageResult & RestaurantSearchConditions & {
   searchId: number;
   locationLabel: string;
+  locationSource?: "device" | "manual";
   genreLabel: string;
 };
 
@@ -139,9 +140,11 @@ export function distanceInMeters(from: Coordinates, to: Coordinates): number {
   return 6371000 * 2 * Math.atan2(Math.sqrt(bounded), Math.sqrt(1 - bounded));
 }
 
-export function formatDistance(meters: number): string {
+export function formatDistance(meters: number, locale: "zh" | "ja" | "en" = "zh"): string {
   const rounded = Math.round(meters);
-  return rounded < 1000 ? `${rounded} 米` : `${(meters / 1000).toFixed(1)} 公里`;
+  return rounded < 1000
+    ? `${rounded} ${locale === "zh" ? "米" : "m"}`
+    : `${(meters / 1000).toFixed(1)} ${locale === "zh" ? "公里" : "km"}`;
 }
 
 export function pickRestaurant(

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/app/components/LanguageProvider";
+
 import { useState, type FormEvent } from "react";
 import useSavedText from "./useSavedText";
 import styles from "./page.module.css";
@@ -56,6 +58,7 @@ export default function JoinRoomForm({
   disabled,
   onBusyChange,
 }: JoinRoomFormProps) {
+  const { t } = useLanguage();
   const [roomCodeInput, setRoomCodeInput] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
@@ -153,17 +156,13 @@ export default function JoinRoomForm({
       <h3
         id="join-room-title"
         className={styles.choiceTitle}
-      >
-        加入朋友的房间
-      </h3>
+      >{t("加入朋友的房间")}</h3>
 
       <form className={styles.form} onSubmit={handleJoin}>
         <label
           className={styles.label}
           htmlFor="join-room-code"
-        >
-          六位房间号
-        </label>
+        >{t("六位房间号")}</label>
 
         <input
           id="join-room-code"
@@ -175,7 +174,7 @@ export default function JoinRoomForm({
           required
           disabled={disabled || isJoining}
           value={roomCodeInput}
-          placeholder="例如：307194"
+          placeholder={t("例如：307194")}
           aria-invalid={Boolean(error)}
           aria-describedby={
             error ? "join-room-error" : undefined
@@ -192,7 +191,7 @@ export default function JoinRoomForm({
           disabled={disabled || isJoining}
           aria-busy={isJoining}
         >
-          {isJoining ? "正在加入…" : "确认加入"}
+          {isJoining ? t("正在加入…") : t("确认加入")}
         </button>
 
         {error ? (
@@ -201,7 +200,7 @@ export default function JoinRoomForm({
             className={styles.errorText}
             role="alert"
           >
-            {error}
+            {t(error)}
           </p>
         ) : null}
       </form>
@@ -210,26 +209,17 @@ export default function JoinRoomForm({
           className={styles.roomPreview}
           aria-labelledby="joined-room-title"
         >
-          <h3 id="joined-room-title">
-            当前已加入的房间
-          </h3>
+          <h3 id="joined-room-title">{t("当前已加入的房间")}</h3>
 
           <p className={styles.roomCode} role="status">
             {joinedRoom.roomCode}
           </p>
 
-          <p className={styles.hint}>
-            你的昵称：{joinedRoom.nickname}
-          </p>
+          <p className={styles.hint}>{t("你的昵称：{name}", { name: joinedRoom.nickname })}</p>
 
-          <p className={styles.hint}>
-            你的角色：
-            {joinedRoom.role === "host" ? "房主" : "成员"}
-          </p>
+          <p className={styles.hint}>{t("你的角色：{role}", { role: joinedRoom.role === "host" ? t("房主") : t("成员") })}</p>
 
-          <p className={styles.hint}>
-            下方候选清单和抽选结果由房间成员共享。
-          </p>
+          <p className={styles.hint}>{t("下方候选清单和抽选结果由房间成员共享。")}</p>
         </section>
       ) : null}
 

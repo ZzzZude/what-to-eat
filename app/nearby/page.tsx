@@ -1,5 +1,8 @@
 "use client";
 
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import { useLanguage } from "@/app/components/LanguageProvider";
+
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import styles from "../page.module.css";
@@ -21,6 +24,7 @@ import {
 } from "./restaurants";
 
 export default function NearbyPage() {
+  const { t, locale } = useLanguage();
   const [location, setLocation] = useState<SearchLocation | null>(null);
   const [locationMode, setLocationMode] = useState<"device" | "manual">("device");
   const [isLocating, setIsLocating] = useState(false);
@@ -149,6 +153,7 @@ export default function NearbyPage() {
       longitude: location.longitude,
       radius,
       locationLabel: location.label,
+      locationSource: location.source,
       genreLabel: genres.length > 0 ? genres.map(genreLabel).join("、") : "不限类型",
       genreCodes: genres.map((genre) => genre.code),
     };
@@ -194,16 +199,13 @@ export default function NearbyPage() {
   return (
     <main className={`${styles.page} ${nearbyStyles.page}`}>
       <div className={styles.content}>
-        <Link href="/" className={`${styles.back} ${nearbyStyles.backLink}`}>
-          ← 返回首页
-        </Link>
+        <LanguageSwitcher />
+        <Link href="/" className={`${styles.back} ${nearbyStyles.backLink}`}>{t("← 返回首页")}</Link>
 
         <header>
-          <p className={styles.brand}>今天吃啥</p>
-          <h1 className={styles.title}>附近吃</h1>
-          <p className={styles.subtitle}>
-            看看周围有什么，让它帮你选一家。
-          </p>
+          <p className={styles.brand}>{t("今天吃啥")}</p>
+          <h1 className={styles.title}>{t("附近吃")}</h1>
+          <p className={styles.subtitle}>{t("看看周围有什么，让它帮你选一家。")}</p>
         </header>
 
         <FavoriteRestaurants
@@ -215,26 +217,22 @@ export default function NearbyPage() {
         />
 
         <section className={styles.preview} aria-labelledby="location-title">
-          <h2 id="location-title">先确定在哪里吃</h2>
-          <p>使用当前位置，或手动选择车站、地址和地点。</p>
+          <h2 id="location-title">{t("先确定在哪里吃")}</h2>
+          <p>{t("使用当前位置，或手动选择车站、地址和地点。")}</p>
 
-          <div className={nearbyStyles.modeChoices} role="group" aria-label="选择位置方式">
+          <div className={nearbyStyles.modeChoices} role="group" aria-label={t("选择位置方式")}>
             <button
               type="button"
               className={nearbyStyles.modeButton}
               aria-pressed={locationMode === "device"}
               onClick={() => handleModeChange("device")}
-            >
-              当前位置
-            </button>
+            >{t("当前位置")}</button>
             <button
               type="button"
               className={nearbyStyles.modeButton}
               aria-pressed={locationMode === "manual"}
               onClick={() => handleModeChange("manual")}
-            >
-              手动指定
-            </button>
+            >{t("手动指定")}</button>
           </div>
 
           {locationMode === "device" ? (
@@ -246,18 +244,18 @@ export default function NearbyPage() {
                 disabled={isLocating}
                 aria-busy={isLocating}
               >
-                {isLocating ? "正在定位…" : "使用当前位置"}
+                {isLocating ? t("正在定位…") : t("使用当前位置")}
               </button>
 
               <p className={styles.help} role="status">
                 {isLocating
-                  ? "请留意浏览器的位置授权提示，授权后等待定位结果。"
+                  ? t("请留意浏览器的位置授权提示，授权后等待定位结果。")
                   : location
-                    ? "位置已获取。"
-                    : "点击按钮后，浏览器可能会询问位置权限。"}
+                    ? t("位置已获取。")
+                    : t("点击按钮后，浏览器可能会询问位置权限。")}
               </p>
               {errorMessage && (
-                <p className={styles.error} role="alert">{errorMessage}</p>
+                <p className={styles.error} role="alert">{t(errorMessage)}</p>
               )}
             </>
           ) : (
@@ -266,18 +264,16 @@ export default function NearbyPage() {
 
           {location && (
             <div className={nearbyStyles.locationSummary}>
-              <p><strong>搜索中心：{location.label}</strong></p>
+              <p><strong>{t("搜索中心：{place}", { place: location.source === "device" ? t("当前位置") : location.label })}</strong></p>
             </div>
           )}
         </section>
         <section className={styles.preview} aria-labelledby="search-title">
-          <h2 id="search-title">设置范围和餐饮类型</h2>
+          <h2 id="search-title">{t("设置范围和餐饮类型")}</h2>
 
           <form onSubmit={handleSearch}>
             <div className={nearbyStyles.radiusField}>
-              <label className={styles.label} htmlFor="search-radius">
-                搜索半径
-              </label>
+              <label className={styles.label} htmlFor="search-radius">{t("搜索半径")}</label>
 
               <select
                 id="search-radius"
@@ -288,9 +284,9 @@ export default function NearbyPage() {
                   resetSearch();
                 }}
               >
-                <option value={500}>500 米</option>
-                <option value={1000}>1 公里</option>
-                <option value={2000}>2 公里</option>
+                <option value={500}>{t("500 米")}</option>
+                <option value={1000}>{t("1 公里")}</option>
+                <option value={2000}>{t("2 公里")}</option>
               </select>
             </div>
 
@@ -302,9 +298,7 @@ export default function NearbyPage() {
               }}
             />
 
-            <p className={styles.help}>
-              以选定地点为中心，按直线距离计算。更改范围或类型后，请重新查找餐馆。
-            </p>
+            <p className={styles.help}>{t("以选定地点为中心，按直线距离计算。更改范围或类型后，请重新查找餐馆。")}</p>
 
             <button
               type="submit"
@@ -312,24 +306,24 @@ export default function NearbyPage() {
               disabled={!location || isLocating || isSearching}
               aria-busy={isSearching}
             >
-              {isSearching ? "正在查找…" : searchError ? "重新查找餐馆" : "查找附近餐馆"}
+              {isSearching ? t("正在查找…") : searchError ? t("重新查找餐馆") : t("查找附近餐馆")}
             </button>
           </form>
 
           <p className={styles.help} role="status">
             {isSearching
-              ? `正在查找周围 ${formatDistance(radius)} 内的餐馆，请稍候。`
+              ? t("正在查找周围 {distance} 内的餐馆，请稍候。", { distance: formatDistance(radius, locale) })
               : !location
                 ? locationMode === "manual"
-                  ? "请先搜索并选择一个地点，再查找餐馆。"
-                  : "请先获取当前位置，再查找餐馆。"
+                  ? t("请先搜索并选择一个地点，再查找餐馆。")
+                  : t("请先获取当前位置，再查找餐馆。")
                 : searchResult
-                  ? `搜索完成，已获取 ${searchResult.restaurants.length} 家餐馆。`
-                  : "位置已就绪，可以开始查找餐馆。"}
+                  ? t("搜索完成，已获取 {count} 家餐馆。", { count: searchResult.restaurants.length })
+                  : t("位置已就绪，可以开始查找餐馆。")}
           </p>
 
           {searchError && (
-            <p className={styles.error} role="alert">{searchError}</p>
+            <p className={styles.error} role="alert">{t(searchError)}</p>
           )}
         </section>
 
@@ -346,15 +340,10 @@ export default function NearbyPage() {
         <footer className={nearbyStyles.attribution}>
           Powered by {" "}
           <a href="https://webservice.recruit.co.jp/" target="_blank" rel="noopener noreferrer">
-            ホットペッパーグルメ Webサービス
+            {t("ホットペッパーグルメ Webサービス")}
           </a>
-          <p>
-            地点数据：{" "}
-            <a href="https://maps.gsi.go.jp/" target="_blank" rel="noopener noreferrer">
-              国土地理院 地理院地図
-            </a>
-            （加工利用）
-          </p>
+          <p>{t("地点数据：")}{" "}
+            <a href="https://maps.gsi.go.jp/" target="_blank" rel="noopener noreferrer">{t("国土地理院 地理院地図")}</a>{t("（加工利用）")}</p>
         </footer>
       </div>
     </main>

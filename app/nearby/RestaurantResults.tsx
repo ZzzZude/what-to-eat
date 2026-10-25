@@ -1,5 +1,9 @@
 "use client";
 
+import { useLanguage } from "@/app/components/LanguageProvider";
+import { message as textMessage, type TranslationInput } from "@/lib/i18n";
+import { genreLabel } from "./genres";
+
 import { useEffect, useRef, useState } from "react";
 import sharedStyles from "../page.module.css";
 import styles from "./page.module.css";
@@ -35,13 +39,14 @@ type Props = {
 class RestaurantUpdateError extends Error {}
 
 export default function RestaurantResults({ search, displayCount, onDisplayCountChange, favorites }: Props) {
+  const { t, locale } = useLanguage();
   const [list, setList] = useState(() => createRestaurantList(search, displayCount));
   const [revision, setRevision] = useState(0);
   const [isReplacing, setIsReplacing] = useState(false);
   const [replacingId, setReplacingId] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState<RestaurantDisplayCount | null>(null);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState<TranslationInput>("");
+  const [error, setError] = useState<TranslationInput>("");
   const activeUpdate = useRef<AbortController | null>(null);
   const canReplace = list.remaining.length > 0 || list.nextStart !== null;
   const isUpdating = isReplacing || pendingCount !== null;
@@ -89,13 +94,13 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
       onDisplayCountChange(count);
       if (changed) setRevision((current) => current + 1);
       const detail = resized.restaurants.length < count
-        ? `已设置最多显示 ${count} 家，当前可显示 ${resized.restaurants.length} 家餐馆。`
-        : `现在显示 ${count} 家餐馆。`;
-      setMessage(`${detail}${changed ? "抽选已重新开始。" : ""}`);
+        ? textMessage("已设置最多显示 {count} 家，当前可显示 {available} 家餐馆。", { count, available: resized.restaurants.length })
+        : textMessage("现在显示 {count} 家餐馆。", { count });
+      setMessage(textMessage("{detail}{restart}", { detail, restart: changed ? textMessage("抽选已重新开始。") : "" }));
     } catch (error) {
       if (activeUpdate.current === controller) {
         setError(error instanceof RestaurantUpdateError
-          ? `${error.message}原列表和显示家数已保留。`
+          ? textMessage("{error}原列表和显示家数已保留。", { error: textMessage(error.message) })
           : controller.signal.aborted
             ? "调整显示家数超时，原列表已保留，请重试。"
             : "暂时无法调整显示家数，原列表已保留，请稍后重试。");
@@ -132,9 +137,9 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
       if (result.replaced > 0) {
         setRevision((current) => current + 1);
         const detail = targetId === null
-          ? `已替换 ${result.replaced} 家餐馆${result.replaced < needed ? "，其余店铺保留" : ""}。`
-          : `已将这家替换为 ${result.state.restaurants.find((item, index) => item.id !== list.restaurants[index].id)?.name}。`;
-        setMessage(`${detail}抽选已重新开始。`);
+          ? textMessage(result.replaced < needed ? "已替换 {count} 家餐馆，其余店铺保留。" : "已替换 {count} 家餐馆。", { count: result.replaced })
+          : textMessage("已将这家替换为 {name}。", { name: result.state.restaurants.find((item, index) => item.id !== list.restaurants[index].id)?.name ?? "" });
+        setMessage(textMessage("{detail}{restart}", { detail, restart: textMessage("抽选已重新开始。") }));
       } else {
         setMessage(updated.nextStart === null
           ? "当前条件下没有其他未显示过的餐馆，列表已保留。可以扩大范围或调整类型后重新查找。"
@@ -161,10 +166,10 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
   return (
     <>
       {list.restaurants.length > 0 && (
-        <nav className={styles.resultNav} aria-label="搜索结果快捷入口">
-          <a href="#search-title">调整条件</a>
-          <a href="#picker-title">帮我决定</a>
-          <a href="#restaurants-title">餐馆列表 · {list.restaurants.length}</a>
+        <nav className={styles.resultNav} aria-label={t("搜索结果快捷入口")}>
+          <a href="#search-title">{t("调整条件")}</a>
+          <a href="#picker-title">{t("帮我决定")}</a>
+          <a href="#restaurants-title">{t("餐馆列表 · {count}", { count: list.restaurants.length })}</a>
         </nav>
       )}
       {list.restaurants.length > 0 && (
@@ -177,22 +182,24 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
         />
       )}
       <section className={styles.results} aria-labelledby="restaurants-title">
-        <h2 id="restaurants-title">附近的餐馆</h2>
-        <p className={styles.summary}>
-          搜索中心：{search.locationLabel}。搜索范围：{formatDistance(search.radius)}。
-          餐饮类型：{search.genreLabel}。
-          搜索时 Hot Pepper 找到 {search.total} 家，当前显示 {list.restaurants.length} 家。
-        </p>
+        <h2 id="restaurants-title">{t("附近的餐馆")}</h2>
+        <p className={styles.summary}>{t("搜索中心：{place}。搜索范围：{distance}。餐饮类型：{genres}。搜索时 Hot Pepper 找到 {total} 家，当前显示 {count} 家。", {
+          place: search.locationSource === "device" ? t("当前位置") : search.locationLabel,
+          distance: formatDistance(search.radius, locale),
+          genres: search.genreLabel.split("、").map((label) => t(label)).join(locale === "en" ? ", " : "、"),
+          total: search.total,
+          count: list.restaurants.length,
+        })}</p>
         {list.restaurants.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>当前条件下暂未获取到 Hot Pepper 收录的餐馆。</p>
-            <p>试试选择不限类型、扩大搜索范围，或更换地点后再查找。</p>
+            <p>{t("当前条件下暂未获取到 Hot Pepper 收录的餐馆。")}</p>
+            <p>{t("试试选择不限类型、扩大搜索范围，或更换地点后再查找。")}</p>
           </div>
         ) : (
           <>
             <div className={styles.listTools}>
               <fieldset className={styles.countFieldset} disabled={isUpdating}>
-                <legend className={styles.countLabel}>显示家数</legend>
+                <legend className={styles.countLabel}>{t("显示家数")}</legend>
                 <div className={styles.countChoices}>
                   {RESTAURANT_DISPLAY_COUNTS.map((count) => (
                     <button
@@ -201,33 +208,30 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
                       className={styles.countButton}
                       aria-pressed={displayCount === count}
                       onClick={() => void handleDisplayCount(count)}
-                    >{count} 家</button>
+                    >{t("{count} 家", { count })}</button>
                   ))}
                 </div>
               </fieldset>
-              <p className={sharedStyles.help}>默认 20 家，不足所选家数时按实际数量显示。抽选仅使用当前列表。</p>
-              <p className={sharedStyles.help}>
-                可以替换单家或换一批；新店沿用本次搜索条件，同次搜索不重复显示已换掉的店。
-                替换成功后，抽选重新开始。
-              </p>
+              <p className={sharedStyles.help}>{t("默认 20 家，不足所选家数时按实际数量显示。抽选仅使用当前列表。")}</p>
+              <p className={sharedStyles.help}>{t("可以替换单家或换一批；新店沿用本次搜索条件，同次搜索不重复显示已换掉的店。 替换成功后，抽选重新开始。")}</p>
               <button
                 type="button"
                 className={`${styles.secondaryButton} ${styles.replaceButton}`}
                 onClick={() => void handleReplace(null)}
                 disabled={isUpdating || !canReplace}
               >
-                {isReplacing && replacingId === null ? "正在换一批…" : "换一批餐馆"}
+                {isReplacing && replacingId === null ? t("正在换一批…") : t("换一批餐馆")}
               </button>
               {!canReplace && (
-                <p className={sharedStyles.help}>当前条件下已没有其他餐馆可替换，可以调整范围或类型后重新查找。</p>
+                <p className={sharedStyles.help}>{t("当前条件下已没有其他餐馆可替换，可以调整范围或类型后重新查找。")}</p>
               )}
               <p className={styles.replacementStatus} role="status" aria-atomic="true">
-                {pendingCount !== null ? `正在调整为 ${pendingCount} 家，请稍候…`
-                  : isReplacing ? "正在查找符合相同条件的其他餐馆…" : message}
+                {pendingCount !== null ? t("正在调整为 {count} 家，请稍候…", { count: pendingCount })
+                  : isReplacing ? t("正在查找符合相同条件的其他餐馆…") : t(message)}
               </p>
-              {error && <p className={sharedStyles.error} role="alert">{error}</p>}
+              {error && <p className={sharedStyles.error} role="alert">{t(error)}</p>}
             </div>
-            <p className={sharedStyles.help}>首次优先显示较近的餐馆。以下距离为相对搜索中心的直线估算。</p>
+            <p className={sharedStyles.help}>{t("首次优先显示较近的餐馆。以下距离为相对搜索中心的直线估算。")}</p>
             <ul className={styles.restaurantList}>
               {list.restaurants.map((restaurant, index) => {
                 const sourceUrl = restaurantSourceUrl(restaurant.sourceUrl);
@@ -236,26 +240,26 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
                     <article className={styles.restaurantCard}>
                       <h3>{restaurant.name}</h3>
                       <div className={styles.meta}>
-                        <span>{restaurant.genre || "暂无分类信息"}</span>
-                        <span>直线约 {formatDistance(distanceInMeters(search, restaurant))}</span>
+                        <span>{restaurant.genre ? t(genreLabel({ code: "", name: restaurant.genre })) : t("暂无分类信息")}</span>
+                        <span>{t("直线约 {distance}", { distance: formatDistance(distanceInMeters(search, restaurant), locale) })}</span>
                       </div>
-                      <p className={styles.address}>{restaurant.address || "暂无地址信息"}</p>
+                      <p className={styles.address}>{restaurant.address || t("暂无地址信息")}</p>
                       <div className={styles.cardActions}>
                         <a
                           className={styles.detailLink}
                           href={restaurantDirectionsUrl(restaurant)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          aria-label={`前往 ${restaurant.name}，在 Google 地图打开步行路线（新窗口）`}
-                        >去导航 ↗</a>
+                          aria-label={t("前往 {name}，在 Google 地图打开步行路线（新窗口）", { name: restaurant.name })}
+                        >{t("去导航 ↗")}</a>
                         {sourceUrl && (
                           <a
                             className={styles.detailLink}
                             href={sourceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`查看 ${restaurant.name} 的店铺详情（新窗口）`}
-                          >查看店铺详情 ↗</a>
+                            aria-label={t("查看 {name} 的店铺详情（新窗口）", { name: restaurant.name })}
+                          >{t("查看店铺详情 ↗")}</a>
                         )}
                       </div>
                       <FavoriteButton key={restaurant.id} restaurant={restaurant} controls={favorites} />
@@ -264,9 +268,9 @@ export default function RestaurantResults({ search, displayCount, onDisplayCount
                         className={`${styles.secondaryButton} ${styles.replaceButton}`}
                         disabled={isUpdating || !canReplace}
                         onClick={() => void handleReplace(restaurant.id)}
-                        aria-label={`替换 ${restaurant.name}`}
+                        aria-label={t("替换 {name}", { name: restaurant.name })}
                       >
-                        {isReplacing && replacingId === restaurant.id ? "正在替换…" : "替换这家"}
+                        {isReplacing && replacingId === restaurant.id ? t("正在替换…") : t("替换这家")}
                       </button>
                     </article>
                   </li>

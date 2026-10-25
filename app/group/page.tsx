@@ -1,5 +1,8 @@
 "use client";
 
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import { useLanguage } from "@/app/components/LanguageProvider";
+
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import CloudCandidates from "./CloudCandidates";
@@ -9,6 +12,7 @@ import sharedStyles from "../page.module.css";
 import styles from "./page.module.css";
 
 export default function GroupPage() {
+  const { t } = useLanguage();
   const [nickname, setNickname] =
     useSavedText("what-to-eat:nickname");
 
@@ -118,22 +122,17 @@ async function handleCreateRoom() {
 }  return (
     <main className={sharedStyles.page}>
       <div className={sharedStyles.content}>
-        <Link href="/" className={styles.backLink}>
-          ← 返回首页
-        </Link>
+        <LanguageSwitcher />
+        <Link href="/" className={styles.backLink}>{t("← 返回首页")}</Link>
 
         <header>
-          <p className={sharedStyles.brand}>GROUP MODE</p>
-          <h1 className={sharedStyles.title}>一起吃</h1>
-          <p className={sharedStyles.subtitle}>
-            输入昵称，然后创建一个新房间或加入朋友的房间。
-          </p>
+          <p className={sharedStyles.brand}>{t("多人组队")}</p>
+          <h1 className={sharedStyles.title}>{t("一起吃")}</h1>
+          <p className={sharedStyles.subtitle}>{t("输入昵称，然后创建一个新房间或加入朋友的房间。")}</p>
         </header>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          <label className={styles.label} htmlFor="nickname">
-            你的昵称
-          </label>
+          <label className={styles.label} htmlFor="nickname">{t("你的昵称")}</label>
 
           <input
             id="nickname"
@@ -144,7 +143,7 @@ async function handleCreateRoom() {
             maxLength={20}
             required
             autoComplete="nickname"
-            placeholder="例如：Yujie"
+            placeholder={t("例如：Yujie")}
             onChange={(event) => {
               setNickname(event.target.value);
               setConfirmedName("");
@@ -158,9 +157,7 @@ async function handleCreateRoom() {
   className={styles.submitButton}
   type="submit"
   disabled={isBusy}
->
-  确认昵称
-</button>
+>{t("确认昵称")}</button>
         </form>
 
         {confirmedName ? (
@@ -168,16 +165,12 @@ async function handleCreateRoom() {
             className={styles.choicePanel}
             aria-labelledby="room-action-title"
           >
-            <p className={styles.message}>
-              你好，{confirmedName}！
-            </p>
+            <p className={styles.message}>{t("你好，{name}！", { name: confirmedName })}</p>
 
             <h2
               id="room-action-title"
               className={styles.choiceTitle}
-            >
-              接下来想做什么？
-            </h2>
+            >{t("接下来想做什么？")}</h2>
 
             <div className={styles.actionList}>
 <button
@@ -189,9 +182,9 @@ async function handleCreateRoom() {
   onClick={handleCreateRoom}
 >
   <strong>
-    {isCreating ? "正在创建…" : "创建房间"}
+    {isCreating ? t("正在创建…") : t("创建房间")}
   </strong>
-  <span>我来发起，然后邀请朋友加入。</span>
+  <span>{t("我来发起，然后邀请朋友加入。")}</span>
               </button>
 
               <button
@@ -201,12 +194,12 @@ async function handleCreateRoom() {
                 aria-pressed={selectedAction === "join"}
                 onClick={() => setSelectedAction("join")}
               >
-                <strong>加入房间</strong>
-                <span>输入朋友发来的房间号码。</span>
+                <strong>{t("加入房间")}</strong>
+                <span>{t("输入朋友发来的房间号码。")}</span>
               </button>            </div>
 {createError ? (
   <p className={styles.errorText} role="alert">
-    {createError}
+    {t(createError)}
   </p>
 ) : null}
             {selectedAction === "create" && roomCode ? (
@@ -214,21 +207,17 @@ async function handleCreateRoom() {
                 className={styles.roomPreview}
                 aria-labelledby="room-preview-title"
               >
-                <h3 id="room-preview-title">房间已创建</h3>
+                <h3 id="room-preview-title">{t("房间已创建")}</h3>
 
-                <p className={styles.hint}>房间号</p>
+                <p className={styles.hint}>{t("房间号")}</p>
 
                 <p className={styles.roomCode} role="status">
                   {roomCode}
                 </p>
 
-                <p className={styles.hint}>
-                  发起人：{confirmedName}
-                </p>
+                <p className={styles.hint}>{t("发起人：{name}", { name: confirmedName })}</p>
 
-                <p className={styles.hint}>
-                  候选清单和抽选结果已支持云端共享。
-                </p>
+                <p className={styles.hint}>{t("候选清单和抽选结果已支持云端共享。")}</p>
               </section>
             ) : null}
 
@@ -249,9 +238,7 @@ async function handleCreateRoom() {
 ) : null}
           </section>
         ) : (
-          <p className={styles.hint}>
-            昵称最长可以输入20个字符。
-          </p>
+          <p className={styles.hint}>{t("昵称最长可以输入20个字符。")}</p>
         )}
       </div>
     </main>
