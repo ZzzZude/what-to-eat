@@ -33,7 +33,7 @@ export default function Home() {
         </p>
 
         <footer className={styles.footer}>
-          多人组队已开放 · 附近餐馆功能开发中
+          多人组队已开放 · 附近餐馆功能已开发
         </footer>
       </div>
     </main>
