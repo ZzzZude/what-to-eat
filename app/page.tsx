@@ -1,12 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 import styles from "./page.module.css";
 
 export default function Home() {
-  const [selectedMode, setSelectedMode] = useState("");
-
   return (
     <main className={styles.page}>
       <div className={styles.content}>
@@ -18,27 +13,23 @@ export default function Home() {
           </p>
         </header>
 
-        <section className={styles.options} aria-label="选择吃饭方式">
-<Link href="/group" className={styles.option}>
-  <strong>一起吃</strong>
-  <span>大家提交想吃的，抽出一个共同选择。</span>
-</Link>
+        <section
+          className={styles.options}
+          aria-label="选择吃饭方式"
+        >
+          <Link href="/group" className={styles.option}>
+            <strong>一起吃</strong>
+            <span>大家提交想吃的，抽出一个共同选择。</span>
+          </Link>
 
-          <button
-            type="button"
-            className={styles.option}
-            aria-pressed={selectedMode === "nearby"}
-            onClick={() => setSelectedMode("nearby")}
-          >
+          <Link href="/nearby" className={styles.option}>
             <strong>附近吃</strong>
             <span>看看周围有什么，让它帮你选一家。</span>
-          </button>
+          </Link>
         </section>
 
-        <p className={styles.status} role="status">
-          {selectedMode === "nearby"
-            ? "附近餐馆功能暂未开放。"
-            : "先选一种方式试试看。"}
+        <p className={styles.status}>
+          先选一种方式试试看。
         </p>
 
         <footer className={styles.footer}>

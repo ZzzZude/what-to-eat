@@ -1,0 +1,639 @@
+.page {
+  align-items: flex-start;
+  color-scheme: light;
+}
+
+.page h2 {
+  scroll-margin-top: 24px;
+}
+
+.page:has(.resultNav) {
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 24px 16px;
+  }
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button:not(:disabled):hover {
+  background: #873d17;
+}
+
+.locationSummary {
+  margin-top: 16px;
+  padding-top: 6px;
+  border-top: 1px solid #eadbcd;
+  color: #76655b;
+  font-size: 13px;
+}
+
+.favoritesSection {
+  margin-top: 24px;
+}
+
+.favoritesPanel {
+  padding: 16px;
+  border: 1px solid #eadbcd;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.favoritesSummary {
+  min-height: 44px;
+  padding: 10px 4px;
+  color: #a44b1d;
+  cursor: pointer;
+}
+
+.favoritesSummary h2 {
+  display: inline;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.favoritesSummary:focus-visible,
+.favoriteButton:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 3px;
+}
+
+.favoritesEmpty {
+  margin-top: 12px;
+  color: #76655b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.favoriteList {
+  display: grid;
+  gap: 12px;
+  max-height: 480px;
+  margin-top: 16px;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.favoriteList .restaurantCard {
+  padding: 14px;
+}
+
+.favoritesError {
+  padding: 0 4px;
+}
+
+.favoriteButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid #d5a783;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #a44b1d;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.favoriteButton[aria-pressed="true"] {
+  background: #fff1e3;
+}
+
+.favoriteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.resultNav {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid #d5a783;
+  border-radius: 14px;
+  background: #fff8ef;
+  box-shadow: 0 3px 12px #34261f12;
+}
+
+.resultNav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 4px;
+  border-radius: 9px;
+  color: #a44b1d;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.resultNav a:hover {
+  background: #fff1e3;
+}
+
+.resultNav a:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 1px;
+}
+
+@media (max-width: 360px) {
+  .resultNav a {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+.radiusField {
+  margin-top: 20px;
+}
+
+.genreFieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.genreChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 264px;
+  overflow-y: auto;
+  margin-top: 12px;
+  padding: 4px;
+}
+
+.genreChoice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 10px;
+  border: 1px solid #eadbcd;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.genreChoice:has(input:checked) {
+  border-color: #a44b1d;
+  background: #fff1e3;
+}
+
+.genreChoice input {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  accent-color: #a44b1d;
+}
+
+.genreChoice:has(input:focus-visible) {
+  outline: 3px solid #a44b1d;
+  outline-offset: 1px;
+}
+
+.genreFieldset:disabled {
+  opacity: 0.6;
+}
+
+.genreSummary {
+  margin-top: 10px;
+  color: #a44b1d;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.listTools {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #eadbcd;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.countFieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.countLabel {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.countChoices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.countButton {
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 1px solid #eadbcd;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #76655b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.countButton[aria-pressed="true"] {
+  border-color: #a44b1d;
+  background: #fff1e3;
+  color: #a44b1d;
+}
+
+.countButton:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 2px;
+}
+
+.countFieldset:disabled {
+  opacity: 0.55;
+}
+
+.countButton:disabled {
+  cursor: wait;
+}
+
+.replaceButton {
+  margin-top: 14px;
+  padding: 11px;
+  font-size: 14px;
+}
+
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.replacementStatus {
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.retryButton {
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid #d5a783;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #a44b1d;
+  font: inherit;
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  background: #fff8ef;
+}
+
+.retryButton:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 4px;
+}
+
+.results {
+  margin-top: 32px;
+}
+
+.results h2 {
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+.summary {
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.restaurantList {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  list-style: none;
+}
+
+.restaurantCard,
+.emptyState {
+  padding: 20px;
+  border: 1px solid #eadbcd;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.restaurantCard h3 {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.address {
+  margin-top: 12px;
+  color: #76655b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.detailLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 14px;
+  color: #a44b1d;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.emptyState {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.emptyState p + p {
+  margin-top: 8px;
+  color: #76655b;
+}
+
+.attribution {
+  margin-top: 32px;
+  color: #76655b;
+  font-size: 11px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.attribution a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.detailLink:focus-visible,
+.attribution a:focus-visible,
+.secondaryButton:focus-visible,
+.navigationLink:focus-visible,
+.modeButton:focus-visible,
+.placeButton:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 4px;
+}
+
+.picker {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #d5a783;
+  border-radius: 20px;
+  background: #fff1e3;
+}
+
+.picker h2 {
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+.pickerDescription {
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.chooseActions {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.chooseButton {
+  margin-top: 0;
+}
+
+.secondaryButton {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d5a783;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #a44b1d;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: #fff8ef;
+}
+
+.drawStatus {
+  margin-top: 14px;
+  color: #76655b;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.selectedCard {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #eadbcd;
+  border-radius: 14px;
+  background: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.selectedLabel {
+  color: #a44b1d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.selectedCard h3 {
+  margin-top: 10px;
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+.navigationLink {
+  display: block;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #a44b1d;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.navigationLink:hover {
+  background: #873d17;
+}
+
+.navigationHint {
+  margin-top: 10px;
+  color: #76655b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 18px;
+}
+
+.modeChoices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.modeButton {
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid #eadbcd;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #76655b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modeButton[aria-pressed="true"] {
+  border-color: #a44b1d;
+  background: #fff1e3;
+  color: #a44b1d;
+}
+
+.manualSearch {
+  margin-top: 20px;
+}
+
+.placeCandidates {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  margin-top: 16px;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.placeCandidate {
+  padding: 14px;
+  border: 1px solid #eadbcd;
+  border-radius: 12px;
+  background: #fff8ef;
+  overflow-wrap: anywhere;
+}
+
+.placeCandidate p {
+  margin-top: 0;
+}
+
+.placeTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.placeCandidate .placeHint {
+  margin-top: 6px;
+  color: #76655b;
+  font-size: 12px;
+}
+
+.placeActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.placeActions .detailLink {
+  margin-top: 0;
+}
+
+.cardActions .detailLink,
+.placeActions .detailLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.placeButton {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #a44b1d;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #a44b1d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.placeButton:disabled {
+  background: #fff1e3;
+  cursor: default;
+}
+
+.attribution p {
+  margin-top: 8px;
+}
