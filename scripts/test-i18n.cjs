@@ -91,6 +91,7 @@ test("all known API errors and saved-favorite errors have translations", () => {
     ...filesIn("app/api").filter((file) => !file.includes("/health/")),
     ...filesIn("lib/rooms"), ...filesIn("lib/supabase"), ...filesIn("lib/hotpepper"),
     "app/nearby/favorites.ts", "app/nearby/useRestaurantFavorites.ts",
+    "app/nearby/regular-restaurants.ts", "app/nearby/useRegularRestaurants.ts",
   ];
   for (const file of files) {
     const source = ts.createSourceFile(file, fs.readFileSync(path.join(root, file), "utf8"), ts.ScriptTarget.Latest, true);

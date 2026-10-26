@@ -38,6 +38,58 @@ const nearbyRoute = loadUtilities("../app/api/nearby/route.ts", {
 });
 const restaurantList = loadUtilities("../app/nearby/restaurant-list.ts");
 const favorites = loadUtilities("../app/nearby/favorites.ts", { "./restaurants": utilities });
+const regulars = loadUtilities("../app/nearby/regular-restaurants.ts", { "./favorites": favorites });
+
+function regularStorage(initial = null) {
+  let text = initial;
+  let writes = 0;
+  return {
+    getItem: (key) => { assert.equal(key, regulars.REGULAR_RESTAURANTS_KEY); return text; },
+    setItem: (key, value) => { assert.equal(key, regulars.REGULAR_RESTAURANTS_KEY); text = value; writes += 1; },
+    text: () => text,
+    writes: () => writes,
+  };
+}
+
+test("常吃清单一次添加五家，不需要坐标，重复店名不增加抽选权重", () => {
+  const storage = regularStorage();
+  const result = regulars.updateRegularRestaurants(storage, { type: "addNames", text: "一兰\n寿司郎，定食屋、咖喱店, 拉面店\n一兰" });
+  assert.equal(result.ok, true);
+  assert.equal(result.added, 5);
+  assert.equal(result.entries.length, 5);
+  assert.ok(result.entries.every((entry) => entry.included && !entry.restaurant));
+  assert.deepEqual(regulars.readRegularRestaurants(storage.text()), result.entries);
+  assert.equal(regulars.updateRegularRestaurants(storage, { type: "addNames", text: " 一兰 \n寿司郎" }).added, 0);
+  regulars.updateRegularRestaurants(storage, { type: "addNames", text: "ＣＡＦＥ\n cafe " });
+  assert.equal(regulars.readRegularRestaurants(storage.text()).length, 6);
+});
+
+test("常吃清单每家机会相同，同轮抽完不重复，全排除不抽选", () => {
+  const storage = regularStorage();
+  const { entries } = regulars.updateRegularRestaurants(storage, { type: "addNames", text: "A,B,C,D,E" });
+  for (let i = 0; i < entries.length; i += 1) {
+    assert.equal(regulars.pickRegularRestaurant(entries, [], () => (i + 0.5) / entries.length).id, entries[i].id);
+  }
+  const chosen = [];
+  for (let i = 0; i < entries.length; i += 1) chosen.push(regulars.pickRegularRestaurant(entries, chosen, () => 0.5).id);
+  assert.equal(new Set(chosen).size, 5);
+  assert.equal(regulars.pickRegularRestaurant(entries, chosen), null);
+  assert.equal(regulars.pickRegularRestaurant(entries.map((entry) => ({ ...entry, included: false })), []), null);
+  assert.equal(regulars.pickRegularRestaurant([], []), null);
+});
+
+test("常吃清单记住勾选，全部参与恢复，修改前保留另一标签页刚加入的店", () => {
+  const storage = regularStorage();
+  const first = regulars.updateRegularRestaurants(storage, { type: "addNames", text: "A,B" }).entries[0];
+  regulars.updateRegularRestaurants(storage, { type: "addNames", text: "C" });
+  regulars.updateRegularRestaurants(storage, { type: "include", id: first.id, included: false });
+  const entries = regulars.readRegularRestaurants(storage.text());
+  assert.deepEqual(entries.map((entry) => entry.name), ["A", "B", "C"]);
+  assert.equal(entries[0].included, false);
+  assert.equal(regulars.pickRegularRestaurant(entries, [], () => 0).name, "B");
+  assert.ok(regulars.updateRegularRestaurants(storage, { type: "includeAll" }).entries.every((entry) => entry.included));
+  assert.deepEqual(regulars.updateRegularRestaurants(storage, { type: "remove", id: first.id }).entries.map((entry) => entry.name), ["B", "C"]);
+});
 const {
   isValidPlaceQuery,
   normalizePlaceQuery,
@@ -68,6 +120,49 @@ const restaurant = {
   genre: "测试分类",
   sourceUrl: "https://www.hotpepper.jp/strTEST/",
 };
+
+test("收藏加入常吃清单保留导航信息，同名手填店补充详情，不保存无关字段", () => {
+  const storage = regularStorage();
+  const manual = regulars.updateRegularRestaurants(storage, { type: "addNames", text: restaurant.name }).entries[0];
+  regulars.updateRegularRestaurants(storage, { type: "include", id: manual.id, included: false });
+  const result = regulars.updateRegularRestaurants(storage, { type: "addFavorite", restaurant: { ...restaurant, privateValue: "discard", sourceUrl: "javascript:alert(1)" } });
+  assert.equal(result.ok, true);
+  assert.equal(result.entries.length, 1);
+  assert.equal(result.entries[0].id, manual.id);
+  assert.equal(result.entries[0].included, false);
+  assert.equal(result.entries[0].restaurant.address, restaurant.address);
+  assert.equal(result.entries[0].restaurant.sourceUrl, "");
+  assert.equal(storage.text().includes("privateValue"), false);
+  assert.equal(regulars.isRegularRestaurant(result.entries, restaurant), true);
+  assert.equal(regulars.updateRegularRestaurants(storage, { type: "addFavorite", restaurant }).entries.length, 1);
+});
+
+test("常吃清单损坏或存储拒绝时不覆盖，不报告保存成功", () => {
+  for (const text of ["broken", '{"version":2,"entries":[]}', JSON.stringify({ version: 1, entries: [{ id: "a", name: "A", included: "yes" }] })]) {
+    const storage = regularStorage(text);
+    assert.equal(regulars.readRegularRestaurants(text), null);
+    assert.equal(regulars.updateRegularRestaurants(storage, { type: "addNames", text: "B" }).ok, false);
+    assert.equal(storage.text(), text);
+    assert.equal(storage.writes(), 0);
+  }
+  const storage = regularStorage();
+  storage.setItem = () => { throw new Error("private-error"); };
+  const result = regulars.updateRegularRestaurants(storage, { type: "addNames", text: "A" });
+  assert.equal(result.ok, false);
+  assert.equal(result.message.includes("private-error"), false);
+  assert.equal(storage.text(), null);
+});
+
+test("空店名、过长店名、无效收藏和超出上限都不写入常吃清单", () => {
+  const storage = regularStorage();
+  for (const update of [
+    { type: "addNames", text: " \n，" },
+    { type: "addNames", text: "A".repeat(61) },
+    { type: "addFavorite", restaurant: { ...restaurant, latitude: null } },
+    { type: "addNames", text: Array.from({ length: 101 }, (_, i) => `店 ${i}`).join("\n") },
+  ]) assert.equal(regulars.updateRegularRestaurants(storage, update).ok, false);
+  assert.equal(storage.writes(), 0);
+});
 
 test("区分服务中匹配的总数与本次显示的餐馆数", () => {
   const result = readRestaurantSearchResult({ ok: true, total: 45, restaurants: [restaurant] });

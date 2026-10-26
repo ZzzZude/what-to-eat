@@ -12,6 +12,8 @@ import ManualLocationSearch from "./ManualLocationSearch";
 import GenreSelect from "./GenreSelect";
 import FavoriteRestaurants from "./FavoriteRestaurants";
 import useRestaurantFavorites from "./useRestaurantFavorites";
+import RegularRestaurants from "./RegularRestaurants";
+import useRegularRestaurants from "./useRegularRestaurants";
 import { genreLabel, type RestaurantGenre } from "./genres";
 import type { PlaceCandidate, SearchLocation } from "./locations";
 import { DEFAULT_RESTAURANT_DISPLAY_COUNT, type RestaurantDisplayCount } from "./restaurant-list";
@@ -39,6 +41,10 @@ export default function NearbyPage() {
   const searchSequence = useRef(0);
   const locationSequence = useRef(0);
   const favorites = useRestaurantFavorites();
+  const regularList = useRegularRestaurants();
+  const [eatingMode, setEatingMode] = useState<"nearby" | "regular" | null>(null);
+  // 已有常吃清单时，下次打开直接进入抽选。
+  const activeEatingMode = eatingMode ?? (regularList.entries.length > 0 ? "regular" : "nearby");
 
   useEffect(() => {
     return () => {
@@ -205,15 +211,38 @@ export default function NearbyPage() {
         <header>
           <p className={styles.brand}>{t("今天吃啥")}</p>
           <h1 className={styles.title}>{t("附近吃")}</h1>
-          <p className={styles.subtitle}>{t("看看周围有什么，让它帮你选一家。")}</p>
+          <p className={styles.subtitle}>{t("发现附近的新店，或从常吃的几家里选。")}</p>
         </header>
 
+        <div className={nearbyStyles.modeChoices} role="group" aria-label={t("选择餐馆来源")}>
+          <button type="button" className={nearbyStyles.modeButton} aria-pressed={activeEatingMode === "nearby"} aria-controls="nearby-mode-panel" onClick={() => setEatingMode("nearby")}>{t("找附近餐馆")}</button>
+          <button type="button" className={nearbyStyles.modeButton} aria-pressed={activeEatingMode === "regular"} aria-controls="regular-mode-panel" onClick={() => setEatingMode("regular")}>{t("常吃清单")}{regularList.entries.length > 0 && <span className={nearbyStyles.modeCount}>{regularList.entries.length}</span>}</button>
+        </div>
+
+        <div id="regular-mode-panel" hidden={activeEatingMode !== "regular"}>
+          <RegularRestaurants
+            list={regularList}
+            favorites={favorites.restaurants}
+            favoritesLoading={favorites.isLoading}
+            favoritesError={favorites.error}
+            onReloadFavorites={favorites.reload}
+            onFindNearby={() => setEatingMode("nearby")}
+          />
+        </div>
+
+        <div id="nearby-mode-panel" hidden={activeEatingMode !== "nearby"}>
         <FavoriteRestaurants
           restaurants={favorites.restaurants}
           isLoading={favorites.isLoading}
           error={favorites.error}
           onReload={favorites.reload}
           controls={favorites}
+          regularList={regularList}
+          onOpenRegular={() => setEatingMode("regular")}
+          onAddToRegular={(restaurant) => {
+            setEatingMode("nearby");
+            return regularList.update({ type: "addFavorite", restaurant });
+          }}
         />
 
         <section className={styles.preview} aria-labelledby="location-title">
@@ -336,6 +365,7 @@ export default function NearbyPage() {
             favorites={favorites}
           />
         )}
+        </div>
 
         <footer className={nearbyStyles.attribution}>
           Powered by {" "}

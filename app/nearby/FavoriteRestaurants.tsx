@@ -3,11 +3,13 @@
 import { useLanguage } from "@/app/components/LanguageProvider";
 import { genreLabel } from "./genres";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import FavoriteButton, { type FavoriteControls } from "./FavoriteButton";
 import { restaurantDirectionsUrl, restaurantSourceUrl, type Restaurant } from "./restaurants";
 import sharedStyles from "../page.module.css";
 import styles from "./page.module.css";
+import { isRegularRestaurant, type RegularUpdateResult } from "./regular-restaurants";
+import type useRegularRestaurants from "./useRegularRestaurants";
 
 type Props = {
   restaurants: readonly Restaurant[];
@@ -15,10 +17,14 @@ type Props = {
   error: string;
   onReload: () => void;
   controls: FavoriteControls;
+  regularList: ReturnType<typeof useRegularRestaurants>;
+  onOpenRegular: () => void;
+  onAddToRegular: (restaurant: Restaurant) => RegularUpdateResult;
 };
 
-export default function FavoriteRestaurants({ restaurants, isLoading, error, onReload, controls }: Props) {
+export default function FavoriteRestaurants({ restaurants, isLoading, error, onReload, controls, regularList, onOpenRegular, onAddToRegular }: Props) {
   const { t } = useLanguage();
+  const [addError, setAddError] = useState("");
   const summary = useRef<HTMLElement | null>(null);
   const panelControls: FavoriteControls = {
     ...controls,
@@ -36,6 +42,9 @@ export default function FavoriteRestaurants({ restaurants, isLoading, error, onR
           <h2>{!isLoading && !error ? t("我的收藏 · {count} 家", { count: restaurants.length }) : t("我的收藏")}</h2>
         </summary>
         <p className={sharedStyles.help}>{t("无需登录，仅保存在当前浏览器，不跨设备同步。清除网站数据会移除收藏。")}</p>
+        <p className={sharedStyles.help}>{t("把固定想吃的几家加入常吃清单，下次直接随机选。")}</p>
+        <button type="button" className={styles.textButton} onClick={onOpenRegular}>{t("去常吃清单抽选 →")}</button>
+        {addError && <p className={sharedStyles.error} role="alert">{t(addError)}</p>}
         {isLoading ? (
           <p className={sharedStyles.help} role="status">{t("正在读取收藏…")}</p>
         ) : !error && restaurants.length === 0 ? (
@@ -71,6 +80,10 @@ export default function FavoriteRestaurants({ restaurants, isLoading, error, onR
                         )}
                       </div>
                       <FavoriteButton restaurant={restaurant} controls={panelControls} />
+                      <button type="button" className={styles.favoriteButton} disabled={!regularList.canEdit || isRegularRestaurant(regularList.entries, restaurant)} onClick={() => {
+                        const result = onAddToRegular(restaurant);
+                        setAddError(result.ok ? "" : result.message);
+                      }}>{isRegularRestaurant(regularList.entries, restaurant) ? t("已在常吃清单") : t("加入常吃清单")}</button>
                     </article>
                   </li>
                 );

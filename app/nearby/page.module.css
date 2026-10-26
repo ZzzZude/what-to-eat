@@ -637,3 +637,163 @@
 .attribution p {
   margin-top: 8px;
 }
+
+.modeCount {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #a44b1d;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.regularIntro {
+  margin-top: 24px;
+}
+
+.regularIntro h2 {
+  font-size: 20px;
+}
+
+.regularListHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.regularListHeading h2 {
+  scroll-margin-top: 24px;
+}
+
+.textButton {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a44b1d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.textButton:disabled {
+  color: #76655b;
+  opacity: 0.65;
+  cursor: default;
+}
+
+.textButton:not(:disabled):hover {
+  background: #fff1e3;
+}
+
+.textButton:focus-visible,
+.regularChoice:has(input:focus-visible),
+.regularImport summary:focus-visible {
+  outline: 3px solid #a44b1d;
+  outline-offset: 3px;
+}
+
+.regularAddForm {
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.regularTextarea {
+  min-height: 108px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.regularAddButton {
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.regularCount {
+  color: #76655b;
+  font-size: 13px;
+}
+
+.regularList {
+  margin-top: 8px;
+  list-style: none;
+}
+
+.regularRow,
+.regularImportRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1e5db;
+}
+
+.regularChoice {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.regularChoice input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: #a44b1d;
+}
+
+.regularChoice strong,
+.regularRowHint {
+  display: block;
+  line-height: 1.6;
+}
+
+.regularChoice strong {
+  font-size: 15px;
+}
+
+.regularChoice:has(input:not(:checked)) strong {
+  color: #76655b;
+  font-weight: 400;
+}
+
+.regularRowHint {
+  margin-top: 2px;
+  color: #76655b;
+  font-size: 12px;
+}
+
+.regularImport {
+  margin-top: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #eadbcd;
+}
+
+.regularImportRow > span {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.regularNotice {
+  margin-top: 12px;
+  color: #76655b;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
